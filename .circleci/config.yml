@@ -1,77 +1,15 @@
-# ---
-# version: 2.1
-# orbs:
-#   docker: circleci/docker@2.2.0
-# executors:
-#   go-executor:
-#     docker:
-#       - image: cimg/go:1.20.2
-# jobs:
-#   build:
-#     working_directory: ~/app
-#     docker:
-#       - image: cimg/go:1.20.2
-#     steps:
-#       - checkout
-#       - restore_cache:
-#           keys:
-#             - go-mod-v1-{{ checksum "go.sum" }}
-#       - run:
-#           name: Install Dependencies
-#           command: go get ./...
-#       - save_cache:
-#           key: go-mod-v1-{{ checksum "go.sum" }}
-#           paths:
-#             - "/go/pkg/mod"
-#       - run:
-#           name: Run tests
-#           command: go test -v
-
-# workflows:
-#   version: 2
-#   test-app:
-#     jobs:
-#       - validate:
-#           filters:
-#             branches:
-#               ignore:
-#                 - /pull\/.*/
-#             tags:
-#               only: /.*/
-#       - gcp-gcr/build-and-push-image:
-#           requires:
-#             - validate
-#           image: ${CIRCLE_PROJECT_REPONAME}
-#           context:
-#             - packlink-github
-#             - packlink-gcr-publish
-#           registry-url: eu.gcr.io
-#           tag: ${CIRCLE_TAG:-$CIRCLE_BRANCH}
-#           filters:
-#             branches:
-#               ignore:
-#                 - /pull\/.*/
-#             tags:
-#               only: /.*/
-
 ---
 version: 2.1
 orbs:
   docker: circleci/docker@2.2.0
 workflows:
-  build-docker-image-only:
+  test-app:
     jobs:
       - docker/publish:
           image: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
           update-description: true
-  build-docker-image-only-with-buildkit:
-    jobs:
-      - docker/publish:
-          image: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
-          remote-docker-version: 20.10.12
-          update-description: true
-          use-buildkit: true
-          use-remote-docker: true
+          context:
+            - common
           filters:
             branches:
               ignore:
